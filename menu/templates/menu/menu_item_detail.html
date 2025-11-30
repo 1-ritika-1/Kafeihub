@@ -31,6 +31,12 @@
                     <button class="btn btn-dark mt-3">Add to Cart</button>
                 </form>
 
+                <form action="{% url 'favourites:add_to_favourites' item.id %}" method="POST" class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-danger mt-3">❤ Add to Favourites</button>
+                </form>
+
+
                 <a href="{% url 'menu:menu_home' %}" class="btn btn-secondary">Go Back</a>
             </div>
         </div>
