@@ -7,9 +7,9 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from django.views.generic import TemplateView
 from .forms import SignupForm, EditAccountForm
-
 from django.contrib.auth.views import PasswordChangeDoneView
 
+from orders.models import Order  # Add this import to get user orders
 
 # -------------------------
 # SIGN UP
@@ -28,7 +28,6 @@ def signup(request):
         form = SignupForm()
 
     return render(request, 'accounts/signup.html', {"form": form})
-
 
 # -------------------------
 # LOGIN
@@ -58,14 +57,14 @@ def login_view(request):
 
     return render(request, 'accounts/login.html')
 
-
 # -------------------------
 # ACCOUNT DETAIL PAGE
 # -------------------------
 @login_required
 def account_detail(request):
-    return render(request, 'accounts/account_detail.html')
-
+    # Get all orders for the logged-in user, newest first
+    user_orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'accounts/account_detail.html', {'user_orders': user_orders})
 
 # -------------------------
 # EDIT ACCOUNT
@@ -85,7 +84,6 @@ def edit_account(request):
 
     return render(request, 'accounts/edit_account.html', {"form": form})
 
-
 # -------------------------
 # CHANGE PASSWORD
 # -------------------------
@@ -103,7 +101,6 @@ def change_password(request):
 
     return render(request, 'accounts/password_change.html', {"form": form})
 
-
 # -------------------------
 # DELETE ACCOUNT
 # -------------------------
@@ -120,7 +117,6 @@ def delete_account(request):
             messages.error(request, "Incorrect password. Try again.")
 
     return render(request, 'accounts/delete_account.html')
-
 
 # Custom view for password change done
 class CustomPasswordChangeDoneView(PasswordChangeDoneView):

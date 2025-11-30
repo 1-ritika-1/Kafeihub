@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from cart.models import CartItem
 from .models import Order, OrderItem, BankPaymentDetails, CashPickupDetails
 
+# -------------------------
+# CHECKOUT
+# -------------------------
 @login_required
 def checkout(request):
     cart_items = CartItem.objects.filter(user=request.user)
@@ -14,7 +17,9 @@ def checkout(request):
         "user_email": request.user.email,
     })
 
-
+# -------------------------
+# PLACE ORDER
+# -------------------------
 @login_required
 def place_order(request):
     if request.method != "POST":
@@ -62,7 +67,19 @@ def place_order(request):
 
     return redirect("orders:success")
 
-
+# -------------------------
+# SUCCESS PAGE
+# -------------------------
 @login_required
 def success(request):
     return render(request, "orders/success.html")
+
+# -------------------------
+# ORDER HISTORY
+# -------------------------
+@login_required
+def order_history(request):
+    # Fetch all orders for the logged-in user, newest first
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    
+    return render(request, "orders/order_history.html", {"orders": orders})

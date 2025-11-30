@@ -5,16 +5,13 @@
 
 {% block content %}
 
-<!-- Add smooth scrolling -->
+<!-- Smooth scrolling -->
 <style>
-    html {
-        scroll-behavior: smooth;
-    }
+    html { scroll-behavior: smooth; }
 </style>
 
 <!-- ============================ Welcome Banner =============================== -->
 <div style="width: 100%; height: 400px; position: relative; border-radius: 0 0 20px 20px; overflow: hidden; display: flex; align-items: flex-start; justify-content: flex-end; padding: 20px 60px 0 0; box-sizing: border-box;">
-
     <!-- Background Image -->
     <img src="{% static 'accounts/images/coffeeback.jpeg' %}" alt="Banner" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit: cover; z-index:0;">
 
@@ -29,15 +26,16 @@
         <a href="#user-card" style="align-self: flex-end; padding:8px 16px; background-color:#4B2E2E; color:#FFF9F4; font-weight:bold; font-size:1rem; border-radius:6px; text-decoration:none; transition:0.3s;">
             View Account Details
         </a>
+        <a href="#order-history" style="align-self: flex-end; padding:8px 16px; background-color:#4B2E2E; color:#FFF9F4; font-weight:bold; font-size:1rem; border-radius:6px; text-decoration:none; transition:0.3s;">
+            View Order History
+        </a>
     </div>
 </div>
 
 <!-- ============================ Top blended row =============================== -->
 <div style="max-width:1000px; margin:40px auto 20px; display:flex; gap:0; align-items:stretch; height:400px; position:relative;">
-
     <!-- USER CARD -->
     <div id="user-card" style="flex:0.5; background:#F5F0E1; border-radius:12px 0 0 12px; padding:36px; box-shadow:0 8px 20px rgba(0,0,0,0.08); display:flex; flex-direction:column; position:relative; z-index:3; color:#4B2E2E;">
-        
         <!-- Initials circle + Edit Profile -->
         <div style="position:relative; display:flex; align-items:center; margin-bottom:20px;">
             <div style="width:78px; height:78px; border-radius:50%; background:#1C0A07; color:#FFF9F4; font-weight:700; display:flex; align-items:center; justify-content:center; font-size:1.6rem;">
@@ -83,33 +81,105 @@
     <!-- SEPARATOR IMAGE -->
     <div style="flex:0.3; background:url('{% static "accounts/images/download.png" %}') center/cover no-repeat; z-index:2;"></div>
 
-    <!-- RIGHT PANEL (Reviews + Sip it section with logo on right) -->
+    <!-- RIGHT PANEL -->
     <div style="flex:0.2; background:#FFFFFF; padding:36px 20px; display:flex; flex-direction:column; justify-content:flex-start; text-align:right; z-index:1; color:#4B2E2E; border-radius:0 12px 12px 0;">
-
-        <!-- Share Experience -->
         <p style="margin:0 0 10px 0; font-weight:900; font-size:1.3rem; white-space: nowrap;">Share your experience</p>
-
-        <!-- FLEX container for text + logo -->
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-            
             <div style="text-align:left;">
                 <p style="margin:6px 0; font-size:1.4rem; font-weight:900; color:#2A1313;">Sip it.</p>
                 <p style="margin:6px 0; font-size:1.4rem; font-weight:900; color:#2A1313;">Smile.</p>
                 <p style="margin:6px 0; font-size:1.4rem; font-weight:900; color:#2A1313;">Share it.</p>
             </div>
-
             <div>
                 <img src="{% static 'accounts/images/logo.png' %}" alt="Logo" style="width:150px; height:auto;">
             </div>
-
         </div>
-
-        <!-- Move "Go to Reviews" below the text + logo block -->
         <a href="{% url 'reviews:reviews_full_list' %}" style="color:#6B4226; font-weight:700; font-size:1rem; text-decoration:none; margin-top:10px; text-align:left;">
             Go to Reviews →
         </a>
-
     </div>
 </div>
+
+<!-- ============================ Order History =============================== -->
+<div style="max-width:1000px; margin:40px auto; display:flex; flex-direction:column; gap:20px;">
+
+    <h2 style="font-size:2rem; font-weight:bold; color:#4B2E2E;">My Orders</h2>
+
+    {% if user_orders %}
+    <div id="order-history">
+
+        {% for order in user_orders %}
+        <div class="order-card" style="background:#F5F0E1; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.08); padding:16px 20px; display:flex; flex-direction:column; gap:10px; {% if forloop.counter > 2 %}display:none;{% endif %}; margin-bottom:6px;">
+
+            <!-- Header Row -->
+            <div style="display:flex; font-weight:700; color:#6B4226; border-bottom:1px solid #CCC; padding-bottom:6px;">
+                <div style="flex:1; min-width:80px;">Order ID</div>
+                <div style="flex:3; min-width:150px;">Item</div>
+                <div style="flex:1; min-width:80px;">Quantity</div>
+                <div style="flex:1; min-width:100px;">Total</div>
+                <div style="flex:1; min-width:100px;">Payment</div>
+            </div>
+
+            <!-- Items -->
+            <div id="order-items-{{ order.id }}">
+                {% for item in order.items.all %}
+                <div class="order-item" style="display:flex; align-items:center; padding:4px 0; color:#4B2E2E;">
+                    <div style="flex:1; min-width:80px;">#{{ order.id }}</div>
+                    <div style="flex:3; min-width:150px;">{{ item.product.name }}</div>
+                    <div style="flex:1; min-width:80px;">{{ item.quantity }}</div>
+                    <div style="flex:1; min-width:100px;">${{ item.price_at_purchase|floatformat:2 }}</div>
+                    <div style="flex:1; min-width:100px;">{{ order.payment_method }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Total Amount Paid -->
+            <div style="display:flex; justify-content:flex-end; font-weight:700; color:#6B4226; margin-top:6px;">
+                Total Amount Paid: ${{ order.total_price|floatformat:2 }}
+            </div>
+
+            <!-- Date -->
+            <div style="flex-basis:100%; text-align:right; margin-top:6px;">
+                <p style="margin:0; font-size:0.9rem; color:#4B2E2E;">{{ order.created_at|date:"d M Y H:i" }}</p>
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Single See All Orders Button -->
+    {% if user_orders|length > 2 %}
+    <div style="text-align:center; margin-top:12px;">
+        <button id="toggle-orders-btn" style="background:#6B4226; color:#FFF9F4; font-weight:600; border:none; border-radius:6px; padding:6px 12px; cursor:pointer;">
+            See All Orders
+        </button>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <p style="font-size:1rem; color:#6B4226;">You have no orders yet.</p>
+    {% endif %}
+
+</div>
+
+<!-- ============================ JS for See All Orders =============================== -->
+<script>
+const toggleBtn = document.getElementById('toggle-orders-btn');
+if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+        const hiddenOrders = document.querySelectorAll('#order-history .order-card');
+        const isCollapsed = toggleBtn.innerText === 'See All Orders';
+
+        hiddenOrders.forEach((order, index) => {
+            if (index >= 2) {
+                order.style.display = isCollapsed ? 'flex' : 'none';
+            }
+        });
+
+        toggleBtn.innerText = isCollapsed ? 'See Less Orders' : 'See All Orders';
+    });
+}
+</script>
 
 {% endblock %}
