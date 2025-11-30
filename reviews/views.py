@@ -1,16 +1,25 @@
 from django.shortcuts import render, redirect
+from django.db.models import Avg
 from .models import Review
 from .forms import ReviewForm  # Assuming you have this form
 
 def reviews_list(request):
-    # Use 'date' instead of 'created_at'
+    # Get latest 3 reviews and all reviews
     latest_three = Review.objects.order_by('-date')[:3]
     all_reviews = Review.objects.order_by('-date')
-    
-    return render(request, 'reviews/reviews.html', {
+
+    # Calculate total reviews and average rating
+    total_reviews = all_reviews.count()
+    average_rating = all_reviews.aggregate(Avg('rating'))['rating__avg'] or 0  # default 0 if no reviews
+
+    context = {
         "latest_three": latest_three,
-        "all_reviews": all_reviews
-    })
+        "all_reviews": all_reviews,
+        "total_reviews": total_reviews,
+        "average_rating": round(average_rating, 1),  # optional rounding
+    }
+    return render(request, 'reviews/reviews.html', context)
+
 
 def add_review(request):
     if request.method == "POST":
@@ -23,10 +32,18 @@ def add_review(request):
 
     return render(request, "reviews/add_review.html", {"form": form})
 
+
 def reviews_full_list(request):
-    # Use 'date' instead of 'created_at'
+    # Get all reviews
     all_reviews = Review.objects.order_by('-date')
-    
-    return render(request, 'reviews/reviews_full_list.html', {
-        "all_reviews": all_reviews
-    })
+
+    # Calculate total reviews and average rating
+    total_reviews = all_reviews.count()
+    average_rating = all_reviews.aggregate(Avg('rating'))['rating__avg'] or 0
+
+    context = {
+        "all_reviews": all_reviews,
+        "total_reviews": total_reviews,
+        "average_rating": round(average_rating, 1),
+    }
+    return render(request, 'reviews/reviews_full_list.html', context)

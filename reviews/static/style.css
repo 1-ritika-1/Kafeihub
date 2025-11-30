@@ -48,31 +48,41 @@
     border: 1px solid #000;
 }
 
-.review-carousel-container {
+/* Carousel */
+.cards-container {
+    position: relative; /* parent for absolute buttons */
+    overflow: hidden;
+    width: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
     margin-top: 30px;
-    gap: 20px;
+}
+
+.cards-wrapper {
+    display: flex;
+    transition: 0.5s ease;
 }
 
 .carousel-btn {
+    position: absolute; /* position relative to container */
+    top: 50%; /* vertical center */
+    transform: translateY(-50%);
+    font-size: 30px;
+    background: rgba(0,0,0,0.3);
     border: none;
-    background: none;
-    font-size: 24px;
+    color: white;
     cursor: pointer;
+    padding: 10px;
+    border-radius: 50%;
+    z-index: 2;
 }
 
-.carousel-wrapper {
-    display: flex;
-    overflow: hidden;
-    width: 70%;
-    justify-content: center;
+.carousel-btn.prev {
+    left: 10px;
 }
 
-.carousel-cards {
-    display: flex;
-    transition: 0.3s ease;
+.carousel-btn.next {
+    right: 10px;
 }
 
 /* Review Card */

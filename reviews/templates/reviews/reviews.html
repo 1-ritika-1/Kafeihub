@@ -30,10 +30,10 @@
         <div>Average Rating: <span>{{ average_rating }} / 5</span></div>
     </div>
 
-    <button id="prevBtn" class="carousel-btn prev">&#10094;</button>
-    <button id="nextBtn" class="carousel-btn next">&#10095;</button>
-
+    <!-- Carousel -->
     <div class="cards-container">
+        <button id="prevBtn" class="carousel-btn prev">&#10094;</button>
+
         <div id="cardsWrapper" class="cards-wrapper">
             {% for r in all_reviews %}
             <div class="review-card {% if forloop.first %}newest-card{% endif %}">
@@ -42,7 +42,7 @@
                     <strong>{{ r.name }}</strong>
                 </div>
                 <div class="review-stars">
-                    {% for i in "12345" %}
+                    {% for i in "12345"|make_list %}
                         {% if forloop.counter <= r.rating %}
                             <span class="star filled">&#9733;</span>
                         {% else %}
@@ -55,6 +55,8 @@
             </div>
             {% endfor %}
         </div>
+
+        <button id="nextBtn" class="carousel-btn next">&#10095;</button>
     </div>
 
     <div class="see-all-btn">
@@ -72,46 +74,22 @@
 const wrapper = document.getElementById('cardsWrapper');
 let offset = 0;
 
-// Store original cards
-const originalCards = Array.from(wrapper.children);
-const cardsPerView = 4;
-const totalCards = originalCards.length;
-
-// Clone only cards AFTER the newest card
-for (let i = 1; i <= cardsPerView; i++) {
-    const index = (i % totalCards);
-    if(index === 0) continue; // skip newest card
-    wrapper.appendChild(originalCards[index].cloneNode(true));
-}
-
-// Calculate card width
+// Calculate card width including margin
 const cardStyle = window.getComputedStyle(wrapper.children[0]);
 const cardWidth = wrapper.children[0].offsetWidth + parseInt(cardStyle.marginRight);
+const totalCards = wrapper.children.length;
 
-// NEXT
+// NEXT button
 document.getElementById('nextBtn').onclick = () => {
-    offset -= cardWidth;
-    wrapper.style.transform = `translateX(${offset}px)`;
-    if (Math.abs(offset) >= totalCards * cardWidth) {
-        wrapper.style.transition = "none";
-        offset = 0;
+    if (Math.abs(offset) < (totalCards - 1) * cardWidth) {
+        offset -= cardWidth;
         wrapper.style.transform = `translateX(${offset}px)`;
-        setTimeout(() => { wrapper.style.transition = "0.5s ease"; }, 20);
     }
 };
 
-// PREV
+// PREV button
 document.getElementById('prevBtn').onclick = () => {
-    if (offset === 0) {
-        wrapper.style.transition = "none";
-        offset = -totalCards * cardWidth;
-        wrapper.style.transform = `translateX(${offset}px)`;
-        setTimeout(() => {
-            wrapper.style.transition = "0.5s ease";
-            offset += cardWidth;
-            wrapper.style.transform = `translateX(${offset}px)`;
-        }, 20);
-    } else {
+    if (offset < 0) {
         offset += cardWidth;
         wrapper.style.transform = `translateX(${offset}px)`;
     }

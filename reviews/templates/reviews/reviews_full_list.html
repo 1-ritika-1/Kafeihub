@@ -171,7 +171,7 @@
 <!-- Buttons -->
 <div style="text-align:center; margin-top:30px; display:flex; justify-content:center; gap:15px;">
     <a href="{% url 'reviews:add_review' %}" class="back-btn">Leave a Review</a>
-    <a href="{% url 'reviews:reviews' %}" class="back-btn">Back</a>
+    <a href="javascript:void(0);" onclick="history.back();" class="back-btn">Back</a>
 </div>
 
 {% endblock %}
