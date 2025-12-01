@@ -7,7 +7,8 @@ body, html {
 }
 
 /* Full-page blurred background */
-body::before {
+body.login-page::before,
+body.signup-page::before {
     content: "";
     position: fixed;
     top: 0;
@@ -315,4 +316,16 @@ body::before {
         padding: 40px 30px;
     }
 }
+
+/* ============================ Order Item + Status Stamp ============================ */
+.order-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative; /* needed for absolute stamp */
+    padding: 4px 0;
+    color: #4B2E2E;
+}
+
+
 
