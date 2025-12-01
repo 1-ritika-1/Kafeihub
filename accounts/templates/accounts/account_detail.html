@@ -55,19 +55,21 @@
             <p style="color:#6B4226; font-style:italic;"><strong>Member since 2023</strong></p>
         </div>
 
-        <div style="display:flex; gap:10px; margin-bottom:15px;">
-            <div style="flex:1; background:#FFF9F4; padding:6px 10px; border-radius:8px; text-align:center; font-size:0.85rem;">
-                <a href="{% url 'accounts:password_change' %}" style="color:#6B4226; font-weight:600; text-decoration:none;">Change Password</a>
-            </div>
-            <div style="flex:1; background:#FFF9F4; padding:6px 10px; border-radius:8px; text-align:center; font-size:0.85rem;">
-                <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0;">
-                    {% csrf_token %}
-                    <button type="submit" style="background:none; border:none; color:#6B4226; font-weight:600; font-size:0.85rem; cursor:pointer; text-decoration:none;">
-                        Logout
-                    </button>
-                </form>
-            </div>
+        <div class="d-flex gap-2 mb-3">
+            <!-- Change Password Button -->
+            <a href="{% url 'accounts:password_change' %}" class="btn btn-light text-brown flex-fill" style="background:#FFF9F4; color:#6B4226; font-weight:600; font-size:0.85rem;">
+                Change Password
+            </a>
+
+            <!-- Logout Button -->
+            <form method="POST" action="{% url 'accounts:logout' %}" class="flex-fill m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-light w-100" style="background:#FFF9F4; color:#6B4226; font-weight:600; font-size:0.85rem;">
+                    Logout
+                </button>
+            </form>
         </div>
+
 
         <div style="text-align:center; margin-top:auto;">
             <a href="{% url 'accounts:delete_account' %}" style="color:#6B4226; font-weight:700; font-size:1rem; text-decoration:underline;">
