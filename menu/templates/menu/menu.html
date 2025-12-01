@@ -61,7 +61,7 @@
                     </div>
                     <!-- Buttons side by side, custom colors -->
                     <div class="d-flex gap-2 mt-2">
-                        <form action="{% url 'cart:add_to_cart' item.id %}" method="POST" class="m-0">
+                        <form class="add-to-cart-form" action="{% url 'cart:add_to_cart' item.id %}" method="POST">
                             {% csrf_token %}
                             <button class="btn btn-dark-brown" style="white-space: nowrap;">Add to Cart</button>
                         </form>
@@ -90,7 +90,7 @@
                     </div>
                     <!-- Buttons side by side, custom colors -->
                     <div class="d-flex gap-2 mt-2">
-                        <form action="{% url 'cart:add_to_cart' item.id %}" method="POST" class="m-0">
+                        <form class="add-to-cart-form" action="{% url 'cart:add_to_cart' item.id %}" method="POST">
                             {% csrf_token %}
                             <button class="btn btn-dark-brown" style="white-space: nowrap;">Add to Cart</button>
                         </form>
@@ -102,6 +102,18 @@
         </div>
         {% endif %}
     {% endfor %}
+</div>
+
+<!-- ADDED TO CART POPUP -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                Item added to cart!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
 </div>
 
 <!-- STYLES -->
@@ -162,10 +174,48 @@
 </style>
 
 <script>
+// Show all items for a category
 function showAll(catId) {
     const allItems = document.getElementById('all-items-' + catId);
     allItems.classList.toggle('d-none');
 }
+
+// Handle Add to Cart form submission via AJAX
+document.querySelectorAll(".add-to-cart-form").forEach(form => {
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        let actionUrl = this.action;
+
+        fetch(actionUrl, {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest"
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success toast
+                let toastEl = document.getElementById("cartToast");
+                let toast = new bootstrap.Toast(toastEl, {
+                    animation: true,
+                    autohide: true,
+                    delay: 2000 // auto-hide after 2 seconds
+                });
+                toast.show();
+            } else {
+                alert("Error adding item to cart.");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error adding item to cart.");
+        });
+    });
+});
 </script>
 
 {% endblock %}

@@ -12,19 +12,12 @@ import random
 
 @login_required
 def add_to_cart(request, product_id):
-    print(f"Attempting to add product with ID: {product_id}")  # Debugging line
-    
     product = get_object_or_404(MenuItem, id=product_id)
-    
-    print(f"Found product: {product.name}, {product.price}")  # Debugging line
 
     if request.method == "POST":
         try:
-            # Get the quantity from the form, default to 1
             quantity = int(request.POST.get("quantity", 1))
-            print(f"Quantity to add: {quantity}")  # Debugging line
 
-            # Add or update cart item
             cart_item, created = CartItem.objects.get_or_create(
                 user=request.user,
                 product=product,
@@ -36,18 +29,11 @@ def add_to_cart(request, product_id):
                 cart_item.quantity += quantity
                 cart_item.save()
 
-            print(f"Item added/updated in cart: {cart_item.product.name} with quantity: {cart_item.quantity}")  # Debugging line
-
-            # Return success response
             return JsonResponse({'success': True})
 
         except Exception as e:
-            # If an error occurs, print it and return failure response
-            print(f"Error adding item to cart: {e}")
             return JsonResponse({'success': False, 'error': str(e)})
-
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
-
 # -------------------------
 # ADD DEAL TO CART
 # -------------------------
