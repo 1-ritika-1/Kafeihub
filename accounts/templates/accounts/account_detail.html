@@ -132,7 +132,7 @@
                             #{{ order.id }}
                         </div>
                     {% else %}
-                        <div style="flex:1; min-width:80px;"></div>
+                        <div style="flex:1; min-width:80px;"></div>  <!-- Empty for subsequent rows -->
                     {% endif %}
 
                     <div style="flex:3; min-width:150px;">{{ item.product.name }}</div>
@@ -141,8 +141,9 @@
                         <div style="flex:1; min-width:120px; position:relative;" rowspan="{{ order.items.count }}">
                             <span class="status-stamp">{{ order.status }}</span>
                         </div>
+                    {% else %}
+                        <div style="flex:1; min-width:120px;"></div>  <!-- Empty for subsequent rows -->
                     {% endif %}
-
 
                     <div style="flex:1; min-width:80px;">{{ item.quantity }}</div>
 
@@ -152,6 +153,8 @@
                         <div style="flex:1; min-width:100px;" rowspan="{{ order.items.count }}">
                             {{ order.payment_method }}
                         </div>
+                    {% else %}
+                        <div style="flex:1; min-width:100px;"></div>  <!-- Empty for subsequent rows -->
                     {% endif %}
 
                 </div>
@@ -186,6 +189,8 @@
     {% endif %}
 
 </div>
+
+
 
 <!-- JS -->
 <script>
