@@ -1,11 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% comment %}
-Homepage Template for KAFEI Coffee Shop
-This template displays the landing page with featured items from the database
-Uses Bootstrap 5 for responsive design and Django template language for dynamic content
-{% endcomment %}
 
 {% block title %}KAFEI — Homepage{% endblock %}
 
@@ -78,28 +73,23 @@ Uses Bootstrap 5 for responsive design and Django template language for dynamic 
         <!-- Menu items grid - displays first 3 active items from database -->
         <div class="row g-4">
             {% for item in menu_items %}
-            <div class="col-md-4">
-                <!-- Individual menu card with hover effect -->
-                <div class="menu-card h-100 shadow-sm">
-                    <!-- Menu item image or placeholder -->
-                    {% if item.image %}
-                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="menu-item-image img-fluid">
-                    {% else %}
-                    <div class="image-placeholder d-flex align-items-center justify-content-center">
-                        <!-- Bootstrap icon as fallback when no image -->
-                        <i class="bi bi-cup-hot fs-1 text-muted"></i>
-                    </div>
-                    {% endif %}
-                    
-                    <!-- Card content area -->
-                    <div class="menu-card-content p-3">
-                        <h4 class="h5 fw-bold text-dark mb-2">{{ item.name }}</h4>
-                        <!-- shorten description to keep cards uniform -->
-                        <p class="text-muted small mb-3">{{ item.description|truncatewords:20 }}</p>
-                        <span class="price h6 fw-bold">${{ item.price }}</span>
-                    </div>
+            <div class="col-md-4 mb-4">
+                <div class="menu-card shadow-sm"
+                    role="button"
+                    onclick="window.location.href='{% url 'menu:menu_item_detail' item.id %}'">
+
+                <div class="card-image-wrapper">
+                    <img src="{{ item.image.url }}" class="menu-item-image img-fluid" alt="{{ item.name }}">
+                </div>
+
+                <div class="p-3">
+                    <h4 class="h5 mb-2">{{ item.name }}</h4>
+                    <p class="text-muted small mb-2">{{ item.description|truncatewords:15 }}</p>
+                    <strong class="text-dark">Rs {{ item.price }}</strong>
                 </div>
             </div>
+        </div>
+
             {% empty %}
             <!-- This displays if there are no menu items in the database -->
             <div class="col-12">
@@ -129,29 +119,30 @@ Uses Bootstrap 5 for responsive design and Django template language for dynamic 
         <div class="row g-4">
             {% for deal in deals %}
             <div class="col-md-4">
-                <div class="deal-card h-100 shadow-sm">
-                    <!-- Deal image or placeholder -->
-                    {% if deal.image %}
-                    <img src="{{ deal.image.url }}" alt="{{ deal.title }}" class="deal-image img-fluid">
-                    {% else %}
-                    <div class="image-placeholder d-flex align-items-center justify-content-center">
-                        <i class="bi bi-tag fs-1 text-muted"></i>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="deal-card-content p-3">
-                        <h4 class="h5 fw-bold text-dark mb-2">{{ deal.title }}</h4>
-                        <p class="text-muted small mb-3">{{ deal.description|truncatewords:20 }}</p>
-                        
-                        <!-- Price display - shows discount if available -->
-                        <div class="deal-prices">
-                            {% if deal.price_before %}
-                            <span class="price-before">${{ deal.price_before }}</span>
-                            {% endif %}
-                            <span class="price-after h6 fw-bold">${{ deal.price_after }}</span>
+                <a href="{% url 'deals:deals' %}?deal={{ deal.id }}" class="text-decoration-none text-dark">
+                    <div class="deal-card h-100 shadow-sm">
+                        {% if deal.image %}
+                        <img src="{{ deal.image.url }}" alt="{{ deal.title }}" class="deal-image img-fluid">
+                        {% else %}
+                        <div class="image-placeholder d-flex align-items-center justify-content-center">
+                            <i class="bi bi-tag fs-1 text-muted"></i>
+                        </div>
+                        {% endif %}
+        
+                        <div class="deal-card-content p-3">
+                            <h4 class="h5 fw-bold text-dark mb-2">{{ deal.title }}</h4>
+                            <p class="text-muted small mb-3">{{ deal.description|truncatewords:20 }}</p>
+
+                            <div class="deal-prices">
+                                {% if deal.price_before %}
+                                <span class="price-before">Rs {{ deal.price_before }}</span>
+                                {% endif %}
+                                <span class="price-after h6 fw-bold">Rs {{ deal.price_after }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
+
             </div>
             {% empty %}
             <!-- Fallback if no deals available -->
