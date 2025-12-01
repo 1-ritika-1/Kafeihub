@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from menu.models import MenuItem
 from .models import CartItem
 from django.http import JsonResponse
+from django.db.models import Count
+import random
 
 
 # ADD TO CART (AJAX ENABLED)
@@ -65,3 +67,25 @@ def remove_from_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
     return redirect("cart:view_cart")
+
+
+@login_required
+def view_cart(request):
+    items = CartItem.objects.filter(user=request.user)
+    total = sum(item.subtotal() for item in items)
+
+    # Get product IDs that are already in the cart
+    cart_product_ids = items.values_list("product_id", flat=True)
+
+    # Get active menu items NOT in the cart
+    suggestions = list(MenuItem.objects.filter(is_active=True).exclude(id__in=cart_product_ids))
+
+    # Pick 4 random suggestions
+    random.shuffle(suggestions)
+    suggestions = suggestions[:4]
+
+    return render(request, "cart/cart.html", {
+        "items": items,
+        "total": total,
+        "suggestions": suggestions
+    })
