@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from menu.models import MenuItem
+from deals.models import Deal
 
 # Stores a single completed order
 class Order(models.Model):
@@ -30,10 +31,11 @@ class Order(models.Model):
         return f"Order #{self.id} - {self.user.username}"
 
 
-# Items inside an order (copied from cart on checkout)
+# Items inside an order (can be menu items or deals)
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey(MenuItem, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(MenuItem, on_delete=models.SET_NULL, null=True, blank=True)
+    deal = models.ForeignKey(Deal, on_delete=models.SET_NULL, null=True, blank=True)
     quantity = models.PositiveIntegerField()
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
 

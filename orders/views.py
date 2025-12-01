@@ -1,6 +1,7 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from cart.models import CartItem
+from deals.models import Deal
 from .models import Order, OrderItem, BankPaymentDetails, CashPickupDetails
 
 # -------------------------
@@ -8,6 +9,7 @@ from .models import Order, OrderItem, BankPaymentDetails, CashPickupDetails
 # -------------------------
 @login_required
 def checkout(request):
+    # Include both normal cart items and temporary "order now" items
     cart_items = CartItem.objects.filter(user=request.user)
     total = sum(item.subtotal() for item in cart_items)
 
@@ -16,6 +18,7 @@ def checkout(request):
         "total": total,
         "user_email": request.user.email,
     })
+
 
 # -------------------------
 # PLACE ORDER
@@ -39,14 +42,22 @@ def place_order(request):
         total_price=total_price,
     )
 
-    # Create order items
+    # Create order items for both menu items and deals
     for item in cart_items:
-        OrderItem.objects.create(
-            order=order,
-            product=item.product,
-            quantity=item.quantity,
-            price_at_purchase=item.product.price
-        )
+        if item.item_type == "MENU":
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price_at_purchase=item.product.price
+            )
+        elif item.item_type == "DEAL":
+            OrderItem.objects.create(
+                order=order,
+                deal=item.deal,
+                quantity=item.quantity,
+                price_at_purchase=item.deal.price_after
+            )
 
     # Save payment details
     if payment_method == "BANK":
@@ -62,10 +73,11 @@ def place_order(request):
             pickup_phone=request.POST.get("pickup_phone")
         )
 
-    # Clear cart
+    # Clear cart (both normal and temporary items)
     cart_items.delete()
 
     return redirect("orders:success")
+
 
 # -------------------------
 # SUCCESS PAGE
@@ -74,12 +86,34 @@ def place_order(request):
 def success(request):
     return render(request, "orders/success.html")
 
+
 # -------------------------
 # ORDER HISTORY
 # -------------------------
 @login_required
 def order_history(request):
-    # Fetch all orders for the logged-in user, newest first
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
-    
     return render(request, "orders/order_history.html", {"orders": orders})
+
+
+# -------------------------
+# ORDER NOW FOR DEALS
+# -------------------------
+@login_required
+def order_now_deal(request, deal_id):
+    deal = get_object_or_404(Deal, id=deal_id)
+
+    # Remove any previous temporary "order now" items
+    CartItem.objects.filter(user=request.user, temp_order_now=True).delete()
+
+    # Add this deal as a temporary cart item
+    CartItem.objects.create(
+        user=request.user,
+        deal=deal,
+        item_type="DEAL",
+        quantity=1,
+        temp_order_now=True
+    )
+
+    # Redirect to checkout
+    return redirect("orders:checkout")

@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from menu.models import MenuItem
+from deals.models import Deal
 from .models import CartItem
 from django.http import JsonResponse
-from django.db.models import Count
 import random
 
-
-# ADD TO CART (AJAX ENABLED)
+# -------------------------
+# ADD MENU ITEM TO CART
+# -------------------------
 @login_required
 def add_to_cart(request, product_id):
     product = get_object_or_404(MenuItem, id=product_id)
@@ -18,37 +19,66 @@ def add_to_cart(request, product_id):
         cart_item, created = CartItem.objects.get_or_create(
             user=request.user,
             product=product,
+            item_type='MENU',
             defaults={'quantity': quantity}
         )
 
-        # If already exists, increase by chosen quantity
         if not created:
             cart_item.quantity += quantity
             cart_item.save()
 
-        # If AJAX request -> return JSON instead of redirect
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return JsonResponse({"success": True, "message": "Item added to cart!"})
-
         return redirect("cart:view_cart")
 
-    return JsonResponse({"success": False}, status=400)
+# -------------------------
+# ADD DEAL TO CART
+# -------------------------
+@login_required
+def add_deal_to_cart(request, deal_id):
+    deal = get_object_or_404(Deal, id=deal_id)
 
+    if request.method == "POST":
+        quantity = int(request.POST.get("quantity", 1))
 
+        cart_item, created = CartItem.objects.get_or_create(
+            user=request.user,
+            deal=deal,
+            item_type='DEAL',
+            defaults={'quantity': quantity}
+        )
 
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
+
+        # Redirect to cart after adding
+        return redirect("cart:view_cart")
+
+    # Redirect somewhere safe if GET request (user clicked URL directly)
+    return redirect("deals:deals")
+
+# -------------------------
 # VIEW CART
+# -------------------------
 @login_required
 def view_cart(request):
     items = CartItem.objects.filter(user=request.user)
     total = sum(item.subtotal() for item in items)
 
+    # Get menu product suggestions
+    cart_product_ids = items.values_list("product_id", flat=True)
+    suggestions = list(MenuItem.objects.filter(is_active=True).exclude(id__in=cart_product_ids))
+    random.shuffle(suggestions)
+    suggestions = suggestions[:4]
+
     return render(request, "cart/cart.html", {
         "items": items,
-        "total": total
+        "total": total,
+        "suggestions": suggestions
     })
 
-
+# -------------------------
 # UPDATE QUANTITY
+# -------------------------
 @login_required
 def update_quantity(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
@@ -60,32 +90,11 @@ def update_quantity(request, item_id):
 
     return redirect("cart:view_cart")
 
-
+# -------------------------
 # REMOVE ITEM
+# -------------------------
 @login_required
 def remove_from_cart(request, item_id):
     item = get_object_or_404(CartItem, id=item_id, user=request.user)
     item.delete()
     return redirect("cart:view_cart")
-
-
-@login_required
-def view_cart(request):
-    items = CartItem.objects.filter(user=request.user)
-    total = sum(item.subtotal() for item in items)
-
-    # Get product IDs that are already in the cart
-    cart_product_ids = items.values_list("product_id", flat=True)
-
-    # Get active menu items NOT in the cart
-    suggestions = list(MenuItem.objects.filter(is_active=True).exclude(id__in=cart_product_ids))
-
-    # Pick 4 random suggestions
-    random.shuffle(suggestions)
-    suggestions = suggestions[:4]
-
-    return render(request, "cart/cart.html", {
-        "items": items,
-        "total": total,
-        "suggestions": suggestions
-    })

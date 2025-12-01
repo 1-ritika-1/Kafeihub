@@ -127,6 +127,7 @@
                 {% for item in order.items.all %}
                 <div class="order-item" style="display:flex; align-items:center; padding:4px 0; color:#4B2E2E; position:relative;">
 
+                    <!-- Order ID (first item only) -->
                     {% if forloop.first %}
                         <div style="flex:1; min-width:80px;" rowspan="{{ order.items.count }}">
                             #{{ order.id }}
@@ -135,19 +136,32 @@
                         <div style="flex:1; min-width:80px;"></div>
                     {% endif %}
 
-                    <div style="flex:3; min-width:150px;">{{ item.product.name }}</div>
+                    <!-- Item Title -->
+                    <div style="flex:3; min-width:150px;">
+                        {% if item.product %}
+                            {{ item.product.name }}
+                        {% elif item.deal %}
+                            {{ item.deal.title }}
+                        {% else %}
+                            Item name not available
+                        {% endif %}
+                    </div>
 
+
+                    <!-- Status (first item only) -->
                     {% if forloop.first %}
                         <div style="flex:1; min-width:120px; position:relative;" rowspan="{{ order.items.count }}">
                             <span class="status-stamp">{{ order.status }}</span>
                         </div>
                     {% endif %}
 
-
+                    <!-- Quantity -->
                     <div style="flex:1; min-width:80px;">{{ item.quantity }}</div>
 
+                    <!-- Total price for this item -->
                     <div style="flex:1; min-width:100px;">${{ item.price_at_purchase|floatformat:2 }}</div>
 
+                    <!-- Payment Method (first item only) -->
                     {% if forloop.first %}
                         <div style="flex:1; min-width:100px;" rowspan="{{ order.items.count }}">
                             {{ order.payment_method }}
@@ -187,7 +201,7 @@
 
 </div>
 
-<!-- JS -->
+<!-- JS for See All / See Less -->
 <script>
 const toggleBtn = document.getElementById('toggle-orders-btn');
 if (toggleBtn) {
@@ -205,5 +219,6 @@ if (toggleBtn) {
     });
 }
 </script>
+
 
 {% endblock %}
