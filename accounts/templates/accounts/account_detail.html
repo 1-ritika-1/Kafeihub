@@ -147,7 +147,7 @@
 
                     <div style="flex:1; min-width:80px;">{{ item.quantity }}</div>
 
-                    <div style="flex:1; min-width:100px;">${{ item.price_at_purchase|floatformat:2 }}</div>
+                    <div style="flex:1; min-width:100px;">Rs{{ item.price_at_purchase|floatformat:2 }}</div>
 
                     {% if forloop.first %}
                         <div style="flex:1; min-width:100px;" rowspan="{{ order.items.count }}">
