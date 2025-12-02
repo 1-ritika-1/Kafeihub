@@ -85,7 +85,7 @@
                             {% endif %}
 
                             <!-- Only Add to Cart button -->
-                            <form action="{% url 'cart:add_deal_to_cart' deal.id %}" method="POST" style="display:inline;">
+                            <form class="deal-add-to-cart-form" action="{% url 'cart:add_deal_to_cart' deal.id %}" method="POST">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-outline-secondary">Add to Cart</button>
                             </form>
@@ -100,6 +100,57 @@
         {% endif %}
     {% endfor %}
 </div>
+
+<!-- ADDED TO CART POPUP -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+    <div id="cartToast" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                Item added to cart!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// Handle Add to Cart form submission via AJAX
+document.querySelectorAll(".deal-add-to-cart-form").forEach(form => {
+    form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        let actionUrl = this.action;
+
+        fetch(actionUrl, {
+            method: "POST",
+            headers: { "X-Requested-With": "XMLHttpRequest" },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success toast
+                let toastEl = document.getElementById("cartToast");
+                let toast = new bootstrap.Toast(toastEl, {
+                    animation: true,
+                    autohide: true,
+                    delay: 2000
+                });
+                toast.show();
+            } else {
+                alert("Error adding deal to cart.");
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Error adding deal to cart.");
+        });
+    });
+});
+</script>
+
 
 {% endblock %}
 

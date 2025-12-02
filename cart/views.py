@@ -3,17 +3,12 @@ from django.contrib.auth.decorators import login_required
 from menu.models import MenuItem
 from deals.models import Deal
 from .models import CartItem
+from django.http import JsonResponse
 import random
 
 # -------------------------
 # ADD MENU ITEM TO CART
 # -------------------------
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from menu.models import MenuItem
-from .models import CartItem
-
 @login_required
 def add_to_cart(request, product_id):
     """
@@ -74,6 +69,11 @@ def add_deal_to_cart(request, deal_id):
             cart_item.quantity += quantity
             cart_item.save()
 
+        # ---------- AJAX REQUEST ----------
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            return JsonResponse({"success": True})
+
+        # ---------- NORMAL REQUEST ----------
         return redirect(request.META.get("HTTP_REFERER", "cart:view_cart"))
 
     return redirect("deals:deals")
