@@ -62,9 +62,16 @@
                 <h5 class="fw-bold" style="color:#4B2E2E;">Total: Rs {{ total }}</h5>
             </div>
 
-            <button class="btn w-100 mt-3 rounded-3" style="background-color:#ffffff; color:#000000; font-weight:600; transition:0.2s;">
+            <!-- ========================= BUTTONS ========================= -->
+            <button type="submit" class="btn w-100 mt-3 rounded-3" style="background-color:#ffffff; color:#000000; font-weight:600; transition:0.2s;">
                 Confirm Payment
             </button>
+
+            <a href="{% url 'cart:view_cart' %}" class="btn w-100 mt-2 rounded-3" style="background-color:#ff0d00; color:#ffffff; font-weight:600;">
+                Cancel Order
+            </a>
+
+
         </form>
     </div>
 </div>
@@ -97,18 +104,25 @@ document.getElementById("payCash").addEventListener("change", function() {
 <style>
 .checkout-background {
     background-image: url("{% static 'accounts/images/coffee-beans.jpeg' %}");
+
     background-size: cover;       
     background-position: center;
     background-repeat: no-repeat;
-    width: 900px;                  
+
+    width: 100%;         
+    max-width: 900px;     
     margin: 0 auto;                
     padding: 30px;
-    border-radius: 20px;           
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
+.checkout-form-wrapper {
+    width: 100%;
+}
 
 .checkout-card {
-    background-color: #ffffff !important; 
+    background-color: rgba(255, 255, 255, 0.95) !important;  /* slightly transparent to show background */
     transition: 0.2s;
 }
 
@@ -121,5 +135,6 @@ document.getElementById("payCash").addEventListener("change", function() {
     background-color:#39211f;
 }
 </style>
+
 
 {% endblock %}
