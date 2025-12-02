@@ -134,17 +134,26 @@
                             #{{ order.id }}
                         </div>
                     {% else %}
-                        <div style="flex:1; min-width:80px;"></div>  <!-- Empty for subsequent rows -->
+                        <div style="flex:1; min-width:80px;"></div>
                     {% endif %}
 
-                    <div style="flex:3; min-width:150px;">{{ item.product.name }}</div>
+                    <!-- FIXED ITEM COLUMN -->
+                    <div style="flex:3; min-width:150px;">
+                        {% if item.product %}
+                            {{ item.product.name }}
+                        {% elif item.deal %}
+                            {{ item.deal.title }}
+                        {% else %}
+                            Unknown Item
+                        {% endif %}
+                    </div>
 
                     {% if forloop.first %}
                         <div style="flex:1; min-width:120px; position:relative;" rowspan="{{ order.items.count }}">
                             <span class="status-stamp">{{ order.status }}</span>
                         </div>
                     {% else %}
-                        <div style="flex:1; min-width:120px;"></div>  <!-- Empty for subsequent rows -->
+                        <div style="flex:1; min-width:120px;"></div>
                     {% endif %}
 
                     <div style="flex:1; min-width:80px;">{{ item.quantity }}</div>
@@ -156,7 +165,7 @@
                             {{ order.payment_method }}
                         </div>
                     {% else %}
-                        <div style="flex:1; min-width:100px;"></div>  <!-- Empty for subsequent rows -->
+                        <div style="flex:1; min-width:100px;"></div>
                     {% endif %}
 
                 </div>
@@ -165,7 +174,7 @@
 
             <!-- Total Amount Paid -->
             <div style="display:flex; justify-content:flex-end; font-weight:700; color:#6B4226; margin-top:6px;">
-                Total Amount Paid: ${{ order.total_price|floatformat:2 }}
+                Total Amount Paid: Rs{{ order.total_price|floatformat:2 }}
             </div>
 
             <!-- Date -->
@@ -191,6 +200,7 @@
     {% endif %}
 
 </div>
+
 
 
 

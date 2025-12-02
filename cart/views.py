@@ -3,37 +3,56 @@ from django.contrib.auth.decorators import login_required
 from menu.models import MenuItem
 from deals.models import Deal
 from .models import CartItem
-from django.http import JsonResponse
 import random
 
 # -------------------------
 # ADD MENU ITEM TO CART
 # -------------------------
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from menu.models import MenuItem
+from .models import CartItem
 
 @login_required
 def add_to_cart(request, product_id):
+    """
+    Adds a MenuItem to the cart. Works for:
+    - Menu page
+    - Product detail page
+    - Favourites page
+    - "You may like" section
+    """
+
     product = get_object_or_404(MenuItem, id=product_id)
 
     if request.method == "POST":
-        try:
-            quantity = int(request.POST.get("quantity", 1))
+        quantity = int(request.POST.get("quantity", 1))
 
-            cart_item, created = CartItem.objects.get_or_create(
-                user=request.user,
-                product=product,
-                item_type='MENU',
-                defaults={'quantity': quantity}
-            )
+        cart_item, created = CartItem.objects.get_or_create(
+            user=request.user,
+            product=product,
+            item_type='MENU',
+            defaults={'quantity': quantity}
+        )
 
-            if not created:
-                cart_item.quantity += quantity
-                cart_item.save()
+        if not created:
+            cart_item.quantity += quantity
+            cart_item.save()
 
+        # If AJAX request → return JSON for toast
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse({'success': True})
 
-        except Exception as e:
-            return JsonResponse({'success': False, 'error': str(e)})
-    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+        # If normal POST → redirect back to previous page
+        return redirect(request.META.get("HTTP_REFERER", "cart:view_cart"))
+
+    # For invalid requests
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+    return redirect("cart:view_cart")
+
 # -------------------------
 # ADD DEAL TO CART
 # -------------------------
@@ -55,11 +74,10 @@ def add_deal_to_cart(request, deal_id):
             cart_item.quantity += quantity
             cart_item.save()
 
-        # Redirect to cart after adding
-        return redirect("cart:view_cart")
+        return redirect(request.META.get("HTTP_REFERER", "cart:view_cart"))
 
-    # Redirect somewhere safe if GET request (user clicked URL directly)
     return redirect("deals:deals")
+
 
 # -------------------------
 # VIEW CART
@@ -69,7 +87,7 @@ def view_cart(request):
     items = CartItem.objects.filter(user=request.user)
     total = sum(item.subtotal() for item in items)
 
-    # Get menu product suggestions
+    # Suggestions
     cart_product_ids = items.values_list("product_id", flat=True)
     suggestions = list(MenuItem.objects.filter(is_active=True).exclude(id__in=cart_product_ids))
     random.shuffle(suggestions)
@@ -80,6 +98,7 @@ def view_cart(request):
         "total": total,
         "suggestions": suggestions
     })
+
 
 # -------------------------
 # UPDATE QUANTITY
@@ -94,6 +113,7 @@ def update_quantity(request, item_id):
         item.save()
 
     return redirect("cart:view_cart")
+
 
 # -------------------------
 # REMOVE ITEM
